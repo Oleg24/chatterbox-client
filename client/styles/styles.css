@@ -1,4 +1,4 @@
-body {
+/*body {
     background: #eee;
     text-align: center;
     padding: 0 25px;
@@ -44,7 +44,7 @@ body {
     font-size: 12px;
     color: green;
     line-height: 13px;
-}
+}*/
 
 form {
     padding: 20px;
@@ -82,3 +82,4 @@ form input[type=text] {
 .spinner img {
     padding: 10px;
 }
+
