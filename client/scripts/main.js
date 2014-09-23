@@ -1,5 +1,6 @@
 var ChatRoom = function(room) {
-  this.chatRoom = (room === undefined || room.length <= 2) ? 'General' : room;
+  this.chatRoom = room;
+  data.rooms.push(this.chatRoom);
   this.$node = $('<li id="' + this.chatRoom + '"><a href="#">' + this.chatRoom + '</a></li>');
   ChatRoom.prototype.addChatRoom.call(this);
 }
@@ -7,11 +8,11 @@ ChatRoom.prototype.addChatRoom = function(){
   $('.dropdown-menu').append(this.$node[0]);
 };
 $(document).ready(function() {
-  ChatRoom('General');
-  console.log('check');
-  app.fetch('https://api.parse.com/1/classes/chatterbox');
-  setInterval(function(){
-    app.fetch('https://api.parse.com/1/classes/chatterbox');
-  }, 10000);
-  app.init();
+  // ChatRoom('General');
+  var url = 'https://api.parse.com/1/classes/chatterbox';
+  server.fetch(url);
+  setInterval(function() {
+    server.fetch(url);
+  }, 5000);
+  buttonEvents.init();
 });
