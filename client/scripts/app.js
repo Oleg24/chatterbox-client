@@ -2,6 +2,7 @@
 
 var app = {
   blockedUsers: [],
+  rooms: [],
   init: function(){
     $('#main').on('click', '.username', function(event) {
       var username = event.currentTarget.dataset.username;
@@ -46,7 +47,7 @@ var app = {
     $.ajax({
       url: url,
       type: 'GET',
-      data: {order: "-createdAt", count: 20},
+      data: {order: "createdAt", count: 20},
       contentType: 'application/json',
       success: function(data){
         _.forEach(data.results, function(messageObj){
@@ -67,7 +68,15 @@ var app = {
     message.username = message.username.replace(/<\/script>|<style>|<\/style>|<script>|<img/g, '');
     message.username = message.username.replace(/%20/g, ' ');
     message.text = message.text.replace(/<\/script>|<\/style>|<style>|<script>|<img/g, '');
-
+    console.log(app.rooms);
+    if (message.roomname === undefined || message.roomname.length <= 2) {
+      message.roomname = "General";
+    }
+    if (app.rooms.indexOf(message.roomname) === -1) {
+      app.rooms.push(message.roomname);
+      ChatRoom(message.roomname);
+    }
+    console.log(message);
     var node = $('<div class="messages username well well-small ' + message.username.replace(/ /g, '') + '" data-username="' + message.username + '">' + message.username + ": " + message.text + '</div>');
     $('#chats').prepend(node);
     node.addClass('slideRight');
@@ -89,3 +98,5 @@ var app = {
     app.send(message);
   },
 };
+
+
