@@ -1,14 +1,31 @@
 // YOUR CODE HERE:
 
 var app = {
+  blockedUsers: [],
   init: function(){
     $('#main').on('click', '.username', function(event) {
       var username = event.currentTarget.dataset.username;
-      app.addFriend(username);
+      $('#blockUser_input').val(username);
+      // app.addFriend(username);
     });
-    $('#send .submit').on('submit', function(event){
-      // do handlesubmit
-      var message = $('#message').val();
+    $('#block_user').on('click', function(event) {
+      var username = $('#blockUser_input').val();
+      var nodeRemove = username.replace(/ /g, '');
+      app.blockedUsers.push(nodeRemove);
+      $('#blockUser_input').val("");
+      $('.' + nodeRemove).remove();
+    })
+    $('#submit_message').on('click', function(event){
+      var message = $('#message_input').val();
+      $('#message_input').val("");
+      app.handleSubmit(message);
+    });
+    $('#message_input').on('keydown', function(event){
+      if (event.keyCode !== 13) {
+        return;
+      }
+      var message = $('#message_input').val();
+      $('#message_input').val("");
       app.handleSubmit(message);
     });
   },
@@ -16,13 +33,12 @@ var app = {
     $.ajax({
       url: 'https://api.parse.com/1/classes/chatterbox',
       type: 'POST',
-      data: JSON.stringify(message),
+      // data: JSON.stringify(message),
+      data: message,
       contentType: 'application/json',
       success: function(data){
-        console.log("send works: \n", data);
       },
       error: function(data){
-        console.log('send error: \n', data);
       }
     });
   },
@@ -30,16 +46,14 @@ var app = {
     $.ajax({
       url: url,
       type: 'GET',
-      contentType: 'application/json', //might not be neccessary
+      data: {order: "-createdAt", count: 20},
+      contentType: 'application/json',
       success: function(data){
-        console.log("fetch success: \n", data);
         _.forEach(data.results, function(messageObj){
-          // messageObj;
           app.addMessage(messageObj);
         });
       },
       error: function(data){
-        console.log("fetch error \n", data);
       }
     });
   },
@@ -47,15 +61,16 @@ var app = {
     $('#chats').children().remove();
   },
   addMessage: function(message){
-    console.log(message);
-    message.username = JSON.stringify(message.username);
-    message.text = JSON.stringify(message.text);
-    var node = $('<text class="messages username" data-username="' + message.username + '">' + message.username + ": " + message.text + '</text>');
-    // based on the message.room we have to select that room in
-    // // the dom and append our message to that room
-    // chats div
-    // $('#' + message.roomname + ' > #chats').append(node);
-    $('#chats').append(node);
+    if(message.text === undefined || message.username === undefined || app.blockedUsers.indexOf(message.username.replace(/ /g, '')) >= 0){
+      return;
+    }
+    message.username = message.username.replace(/<\/script>|<style>|<\/style>|<script>|<img/g, '');
+    message.username = message.username.replace(/%20/g, ' ');
+    message.text = message.text.replace(/<\/script>|<\/style>|<style>|<script>|<img/g, '');
+
+    var node = $('<div class="messages username well well-small ' + message.username.replace(/ /g, '') + '" data-username="' + message.username + '">' + message.username + ": " + message.text + '</div>');
+    $('#chats').prepend(node);
+    node.addClass('slideRight');
   },
   addRoom: function(room) {
     var chat_room = $('<div class="chatroom" id="' + room + '"></div>');
@@ -65,7 +80,6 @@ var app = {
 
   },
   handleSubmit: function(text){
-    console.log('hey');
     var message = {
       username: window.location.search.slice(window.location.search.indexOf('=') + 1),
       text: text

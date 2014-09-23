@@ -65,6 +65,10 @@ form input[type=text] {
     background-color: #eee;
 }
 
+#chats {
+    position: absolute;
+}
+
 .chat .username {
     font-weight: 800;
 }
@@ -83,3 +87,18 @@ form input[type=text] {
     padding: 10px;
 }
 
+#footer {
+    margin-top: 20px;
+}
+
+.floatR {
+  float: right;
+}
+
+.floatL {
+  float: left;
+}
+.hideMessage{
+  display: none;
+
+}
