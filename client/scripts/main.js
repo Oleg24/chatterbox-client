@@ -13,6 +13,6 @@ $(document).ready(function() {
   server.fetch(url);
   setInterval(function() {
     server.fetch(url);
-  }, 5000);
+  }, 2500);
   buttonEvents.init();
 });

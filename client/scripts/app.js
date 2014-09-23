@@ -3,9 +3,9 @@ var data = {
   blockedUsers: [],
   friends: [],
   rooms: [],
-  currentRoom: 'General'
+  currentRoom: 'General',
+  chats: {}
 };
-
 // server stores any functionality related to server interaction
 var server = {
   send: function(message) {
@@ -21,9 +21,13 @@ var server = {
       url: url + '?order=-createdAt',
       type: 'GET',
       contentType: 'application/json',
-      success: function(data){
-        _.forEach(data.results, function(messageObj){
-          app.addMessage(messageObj);
+      success: function(response) {
+        _.forEach(response.results, function(messageObj) {
+          var id = messageObj.objectId;
+          if (data.chats[id] === undefined) {
+            data.chats[id] = true;
+            app.addMessage(messageObj);
+          }
         });
       }
     });
@@ -55,6 +59,7 @@ var buttonEvents = {
     $('.dropdown-menu').on('click', 'li', function(e) {
       var room_name = e.currentTarget.id;
       data.currentRoom = room_name;
+      app.switchRoom();
     });
 
     //send messages on click or enter
@@ -91,27 +96,6 @@ var buttonEvents = {
 
 // app stores any functionality related to changing dom
 var app = {
-  send: function(message) {
-    $.ajax({
-      url: 'https://api.parse.com/1/classes/chatterbox',
-      type: 'POST',
-      data: message,
-      contentType: 'application/json',
-    });
-  },
-  fetch: function(url) {
-    $.ajax({
-      url: url,
-      type: 'GET',
-      data: {order: "-createdAt", count: 20},
-      contentType: 'application/json',
-      success: function(data) {
-        _.forEach(data.results, function(messageObj){
-          app.addMessage(messageObj);
-        });
-      }
-    });
-  },
   addMessage: function(message) {
     var strong = ['', ''];
     var room = _.escape(message.roomname);
@@ -138,6 +122,11 @@ var app = {
     var node = $('<div class="messages username well well-small ' + user.replace(/ /g, '') + '" data-user="' + user + '">' + strong[0] + user + ": " + msg + strong[1] + '</div>');
     $('#chats').prepend(node);
     node.addClass('slideRight');
+  },
+  switchRoom: function() {
+    $('#chats').children().remove();
+    data.chats = {};
+    server.fetch('https://api.parse.com/1/classes/chatterbox');
   }
 };
 
