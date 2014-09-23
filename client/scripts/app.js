@@ -2,19 +2,36 @@
 
 var app = {
   blockedUsers: [],
-  rooms: [],
+  friends: [],
+  rooms: ['General'],
+  currentRoom: 'General',
   init: function(){
     $('#main').on('click', '.username', function(event) {
       var username = event.currentTarget.dataset.username;
-      $('#blockUser_input').val(username);
-      // app.addFriend(username);
+      $('#user_input').val(username);
     });
     $('#block_user').on('click', function(event) {
-      var username = $('#blockUser_input').val();
+      var username = $('#user_input').val();
       var nodeRemove = username.replace(/ /g, '');
       app.blockedUsers.push(nodeRemove);
-      $('#blockUser_input').val("");
+      $('#user_input').val("");
       $('.' + nodeRemove).remove();
+    });
+    $('.dropdown-menu').on('click', 'li', function(event) {
+      var room_name = event.currentTarget.id;
+      app.currentRoom = room_name;
+    });
+    $('#add_friend').on('click', function() {
+      var username = $('#user_input').val();
+      var nodeFriend = username.replace(/ /g, '');
+      app.friends.push(nodeFriend);
+      $('#user_input').val("");
+    })
+    $('#add_room').on('click', function() {
+      var roomname = $('#user_input').val();
+      app.rooms.push(roomname);
+      ChatRoom(roomname);
+      $('#user_input').val("");
     })
     $('#submit_message').on('click', function(event){
       var message = $('#message_input').val();
@@ -34,7 +51,6 @@ var app = {
     $.ajax({
       url: 'https://api.parse.com/1/classes/chatterbox',
       type: 'POST',
-      // data: JSON.stringify(message),
       data: message,
       contentType: 'application/json',
       success: function(data){
@@ -68,7 +84,6 @@ var app = {
     message.username = message.username.replace(/<\/script>|<style>|<\/style>|<script>|<img/g, '');
     message.username = message.username.replace(/%20/g, ' ');
     message.text = message.text.replace(/<\/script>|<\/style>|<style>|<script>|<img/g, '');
-    console.log(app.rooms);
     if (message.roomname === undefined || message.roomname.length <= 2) {
       message.roomname = "General";
     }
@@ -76,8 +91,13 @@ var app = {
       app.rooms.push(message.roomname);
       ChatRoom(message.roomname);
     }
-    console.log(message);
-    var node = $('<div class="messages username well well-small ' + message.username.replace(/ /g, '') + '" data-username="' + message.username + '">' + message.username + ": " + message.text + '</div>');
+    var strong = ['', '']
+    if (app.friends.indexOf(message.username) >= 0) {
+      strong[0] = '<strong>';
+      strong[1] = '</strong>';
+    }
+    if (app.currentRoom !== message.roomname) {return;}
+    var node = $('<div class="messages username well well-small ' + message.username.replace(/ /g, '') + '" data-username="' + message.username + '">' + strong[0] + message.username + ": " + message.text + strong[1] + '</div>');
     $('#chats').prepend(node);
     node.addClass('slideRight');
   },
